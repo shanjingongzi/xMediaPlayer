@@ -68,3 +68,7 @@ bool avdecode::OpenVideo(const std::string &filename)
     av_dump_format(pformatCtx,0,filename.c_str(),0);
     return true;
 }
+void avdecode::ReadPacket(AVPacket &packet)
+{
+    int ret=avcodec_receive_packet(pCodecCtx,&packet);
+}
