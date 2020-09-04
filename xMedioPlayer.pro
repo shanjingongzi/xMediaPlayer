@@ -35,11 +35,10 @@ INCLUDEPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
 DEPENDPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
 QMAKE_LIBDIR+=$$PWD/../../../../opt/Qt5.14.2/5.14.2/gcc_64/lib
 INCLUDEPATH += $$PWD/../../../../usr/local/include/opencv4
+INCLUDEPATH += $$PWD/../../../../usr/local/include
+QMAKE_LIBDIR+= $$PWD/../../../../usr/local/lib
 unix:!macx: LIBS += -lavcodec
 unix:!macx: LIBS += -lavformat
-
 unix:!macx: LIBS += -lavutil
-
 unix:!macx: LIBS += -lavfilter
-
-unix:!macx: LIBS += -lopencv_world
+unix|win32: LIBS += -lopencv_world

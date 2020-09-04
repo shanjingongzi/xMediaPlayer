@@ -19,5 +19,5 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionopen_triggered()
 {
     decoder->Initialized();
-    decoder->OpenVideo("");
+    decoder->OpenVideo("/home/shanjingongzi/视频/video.mp4");
 }
