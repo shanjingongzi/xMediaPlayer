@@ -34,10 +34,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 INCLUDEPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
 DEPENDPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
 QMAKE_LIBDIR+=$$PWD/../../../../opt/Qt5.14.2/5.14.2/gcc_64/lib
-
+INCLUDEPATH += $$PWD/../../../../usr/local/include/opencv4
 unix:!macx: LIBS += -lavcodec
 unix:!macx: LIBS += -lavformat
 
 unix:!macx: LIBS += -lavutil
 
 unix:!macx: LIBS += -lavfilter
+
+unix:!macx: LIBS += -lopencv_world

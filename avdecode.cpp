@@ -68,7 +68,44 @@ bool avdecode::OpenVideo(const std::string &filename)
     av_dump_format(pformatCtx,0,filename.c_str(),0);
     return true;
 }
-void avdecode::ReadPacket(AVPacket &packet)
+inline bool avdecode::ReadPacket(AVPacket &packet)
 {
-    int ret=avcodec_receive_packet(pCodecCtx,&packet);
+    return av_read_frame(pformatCtx,&packet)>=0;
+}
+inline FrameType avdecode::ReadFrame(AVFrame &frame, const AVPacket *packet)
+{
+    int got_frame=-1;
+    if(packet->stream_index==videoIndex)
+    {
+        int ret=avcodec_decode_video2(pCodecCtx,&frame,&got_frame,packet);
+        if(ret<0)
+        {
+            return ERROR_FRAME;
+        }
+        if(got_frame<0)
+        {
+            return EMPTY_FRAME;
+        }
+        else
+        {
+            return VIDEO_FRAME;
+        }
+    }
+    if(packet->stream_index==audioIndex)
+    {
+        int ret=avcodec_decode_audio4(pACodecCtx,&frame,&got_frame,packet);
+        if(ret<0)
+        {
+            return ERROR_FRAME;
+        }
+        if(got_frame<0)
+        {
+            return EMPTY_FRAME;
+        }
+        else
+        {
+            return AUDIO_FRAME;
+        }
+
+    }
 }

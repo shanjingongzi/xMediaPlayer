@@ -6,10 +6,18 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    decoder=new avdecode();
 }
 
 MainWindow::~MainWindow()
 {
+    delete decoder;
     delete ui;
 }
 
+
+void MainWindow::on_actionopen_triggered()
+{
+    decoder->Initialized();
+    decoder->OpenVideo("");
+}
