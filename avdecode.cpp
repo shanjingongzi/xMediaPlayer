@@ -1,5 +1,6 @@
 #include "avdecode.h"
-
+using namespace std;
+using namespace cv;
 avdecode::avdecode()
 {
     pCodec=nullptr;
@@ -13,6 +14,13 @@ avdecode::avdecode()
 void avdecode::Initialized()
 {
     av_register_all();
+    for(int i=0;i<256;i++)
+    {
+        for(int j=0;j<256;j++)
+        {
+            
+        }
+    }
 }
 bool avdecode::OpenVideo(const std::string &filename)
 {
@@ -108,4 +116,8 @@ inline FrameType avdecode::ReadFrame(AVFrame &frame, const AVPacket *packet)
         }
 
     }
+}
+void avdecode::YuvToMat(uchar *y,uchar *u,uchar *v,Mat *dst,int width,int height)
+{
+
 }
