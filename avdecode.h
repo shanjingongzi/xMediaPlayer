@@ -25,11 +25,17 @@ class avdecode
 public:
     avdecode();
     bool             OpenVideo(const std::string&filename);
-    inline bool      ReadPacket(AVPacket &packet);
+    inline bool      ReadPacket(AVPacket *packet);
     void             Initialized();
-    inline FrameType ReadFrame(AVFrame&frame,const AVPacket*packet);
+    inline FrameType ReadFrame(AVFrame*frame,const AVPacket*packet);
     void             YuvToMat(uchar *y,uchar *u,uchar *v,cv::Mat *dst,int width,int height);
-
+    int              GetWidth();
+    int              GetHeight();
+private:
+    static uchar R_Table[256][256];
+    static uchar G_Table[256][256];
+    static uchar G_Temp_Table[256][256];
+    static uchar B_Table[256][256];
 private:
     AVFormatContext *pformatCtx;
     AVCodec *pCodec;
@@ -38,10 +44,25 @@ private:
     AVCodecContext *pACodecCtx;
     int videoIndex;
     int audioIndex;
-    static uchar R_Table[255][255];
-    static uchar G_Table[255][255];
-    static uchar G_Temp_Table[255][255];
-    static uchar B_Tbale[255][255];
+
 };
+inline bool avdecode::ReadPacket(AVPacket *packet)
+{
+    return av_read_frame(pformatCtx,packet)>=0;
+}
+inline FrameType avdecode::ReadFrame(AVFrame *frame, const AVPacket *packet)
+{
+    int got_frame=-1;
+    if(packet->stream_index==videoIndex)
+    {
+        if(avcodec_decode_video2(pCodecCtx,frame,&got_frame,packet)<0) return ERROR_FRAME;
+        return got_frame>0?VIDEO_FRAME:EMPTY_FRAME;
+    }
+    else if(packet->stream_index==audioIndex)
+    {
+        if(avcodec_decode_audio4(pACodecCtx,frame,&got_frame,packet)<0) return ERROR_FRAME;
+        return got_frame>0?AUDIO_FRAME:EMPTY_FRAME;
+    }
+}
 
 #endif // AVDECODE_H

@@ -1,6 +1,12 @@
 #include "avdecode.h"
 using namespace std;
 using namespace cv;
+
+//static var 定义
+uchar avdecode::B_Table[256][256];
+uchar avdecode::G_Table[256][256];
+uchar avdecode::R_Table[256][256];
+uchar avdecode::G_Temp_Table[256][256];
 avdecode::avdecode()
 {
     pCodec=nullptr;
@@ -79,66 +85,33 @@ bool avdecode::OpenVideo(const std::string &filename)
     av_dump_format(pformatCtx,0,filename.c_str(),0);
     return true;
 }
-inline bool avdecode::ReadPacket(AVPacket &packet)
-{
-    return av_read_frame(pformatCtx,&packet)>=0;
-}
-inline FrameType avdecode::ReadFrame(AVFrame &frame, const AVPacket *packet)
-{
-    int got_frame=-1;
-    if(packet->stream_index==videoIndex)
-    {
-        int ret=avcodec_decode_video2(pCodecCtx,&frame,&got_frame,packet);
-        if(ret<0)
-        {
-            return ERROR_FRAME;
-        }
-        if(got_frame<0)
-        {
-            return EMPTY_FRAME;
-        }
-        else
-        {
-            return VIDEO_FRAME;
-        }
-    }
-    if(packet->stream_index==audioIndex)
-    {
-        int ret=avcodec_decode_audio4(pACodecCtx,&frame,&got_frame,packet);
-        if(ret<0)
-        {
-            return ERROR_FRAME;
-        }
-        if(got_frame<0)
-        {
-            return EMPTY_FRAME;
-        }
-        else
-        {
-            return AUDIO_FRAME;
-        }
-
-    }
-}
 void avdecode::YuvToMat(uchar *y,uchar *u,uchar *v,Mat *dst,int width,int height)
 {
     int uwidth=width>>1;
     int rgbWidth=width*3;
     int offset=0;
-    uchar R,G,B;
+    uchar Y,U,V;
     int yIdx,uIdx,vIdx;
     for(int i=0;i<height;i++)
     {
         for(int j=0;j<width;j++)
         {
-            yIdx=i*width+j*3;
-            uIdx=i>>1*uwidth+j>>1;
+            yIdx=i*width+j;
+            uIdx=(i>>1)*uwidth+(j>>1);
             Y=y[yIdx];
             U=u[uIdx];
             V=v[uIdx];
-            dst->data[offset++]=B_Tbale[Y][U];
+            dst->data[offset++]=B_Table[Y][U];
             dst->data[offset++]=G_Table[Y][G_Temp_Table[U][V]];
             dst->data[offset++]=R_Table[Y][V];
         }
     }
+}
+int avdecode::GetWidth()
+{
+    return pCodecCtx->width;
+}
+int avdecode::GetHeight()
+{
+    return pCodecCtx->height;
 }
