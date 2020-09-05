@@ -128,5 +128,5 @@ int avdecode::GetHeight()
 }
 void avdecode::ConvertAudio(const AVFrame *const aframe)
 {
-
+    int result=swr_convert(audios)
 }

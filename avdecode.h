@@ -14,11 +14,14 @@ extern "C"
 #include"libavutil/imgutils.h"
 #include"libavutil/imgutils.h"
 #include"libavformat/avformat.h"
+#include"libswscale/swscale.h"
+#include"libswresample/swresample.h"
 }
 #include<string>
 #include<queue>
 #include"opencv2/opencv.hpp"
-
+#include<QAudioOutput>
+#include<QAudioDeviceInfo>
 
 class avdecode
 {
@@ -31,6 +34,8 @@ public:
     void             YuvToMat(uchar *y,uchar *u,uchar *v,cv::Mat *dst,int width,int height);
     int              GetWidth();
     int              GetHeight();
+    void             InitializeAudio(int smpleRate,int smpleSize,int channelCount);
+    void             ConvertAudio(const AVFrame* const frame);
 private:
     static uchar R_Table[256][256];
     static uchar G_Table[256][256];
@@ -44,6 +49,10 @@ private:
     AVCodecContext *pACodecCtx;
     int videoIndex;
     int audioIndex;
+private:
+    QAudioFormat      aformat;
+    QAudioDeviceInfo  ainfo;
+    bool              audioDeviceOk;
 
 };
 inline bool avdecode::ReadPacket(AVPacket *packet)
@@ -53,13 +62,11 @@ inline bool avdecode::ReadPacket(AVPacket *packet)
 inline FrameType avdecode::ReadFrame(AVFrame *frame, const AVPacket *packet)
 {
     int got_frame=-1;
-    if(packet->stream_index==videoIndex)
-    {
+    if(packet->stream_index==videoIndex){
         if(avcodec_decode_video2(pCodecCtx,frame,&got_frame,packet)<0) return ERROR_FRAME;
         return got_frame>0?VIDEO_FRAME:EMPTY_FRAME;
     }
-    else if(packet->stream_index==audioIndex)
-    {
+    else if(packet->stream_index==audioIndex){
         if(avcodec_decode_audio4(pACodecCtx,frame,&got_frame,packet)<0) return ERROR_FRAME;
         return got_frame>0?AUDIO_FRAME:EMPTY_FRAME;
     }
