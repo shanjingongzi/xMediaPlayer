@@ -1,11 +1,13 @@
 #ifndef OPENGLWIDGET_H
 #define OPENGLWIDGET_H
+#include<QOpenGLWidget>
+#include<QOpenGLFunctions>
 
-
-class OpenGLWidget
+class OpenGLWidget:public QOpenGLWidget,public QOpenGLFunctions
 {
 public:
-    OpenGLWidget();
+    OpenGLWidget(QWidget *parent);
+
 };
 
 #endif // OPENGLWIDGET_H

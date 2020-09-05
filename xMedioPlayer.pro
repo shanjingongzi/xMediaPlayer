@@ -18,11 +18,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     avdecode.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    openglwidget.cpp
 
 HEADERS += \
     avdecode.h \
-    mainwindow.h
+    mainwindow.h \
+    openglwidget.h
 
 FORMS += \
     mainwindow.ui

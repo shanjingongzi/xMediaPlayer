@@ -18,7 +18,10 @@ void avdecode::Initialized()
     {
         for(int j=0;j<256;j++)
         {
-            
+            R_Table[i][j]=ADJUST(i+1.4075*(j-128));
+            B_Table[i][j]=ADJUST(i+1.7790*(j-128));
+            G_Temp_Table[i][j]=0.3455*(i-128)+0.7169*(j-128);
+            G_Table[i][j]=ADJUST(i-j);
         }
     }
 }
@@ -119,5 +122,23 @@ inline FrameType avdecode::ReadFrame(AVFrame &frame, const AVPacket *packet)
 }
 void avdecode::YuvToMat(uchar *y,uchar *u,uchar *v,Mat *dst,int width,int height)
 {
-
+    int uwidth=width>>1;
+    int rgbWidth=width*3;
+    int offset=0;
+    uchar R,G,B;
+    int yIdx,uIdx,vIdx;
+    for(int i=0;i<height;i++)
+    {
+        for(int j=0;j<width;j++)
+        {
+            yIdx=i*width+j*3;
+            uIdx=i>>1*uwidth+j>>1;
+            Y=y[yIdx];
+            U=u[uIdx];
+            V=v[uIdx];
+            dst->data[offset++]=B_Tbale[Y][U];
+            dst->data[offset++]=G_Table[Y][G_Temp_Table[U][V]];
+            dst->data[offset++]=R_Table[Y][V];
+        }
+    }
 }
