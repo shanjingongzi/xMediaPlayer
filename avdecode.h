@@ -34,25 +34,30 @@ public:
     void             YuvToMat(uchar *y,uchar *u,uchar *v,cv::Mat *dst,int width,int height);
     int              GetWidth();
     int              GetHeight();
-    void             InitializeAudio(int smpleRate,int smpleSize,int channelCount);
-    void             ConvertAudio(const AVFrame* const frame);
+    void             InitializeAudio();
+    void             ConvertAudio(const AVFrame* const frame,char *out);
 private:
-    static uchar R_Table[256][256];
-    static uchar G_Table[256][256];
-    static uchar G_Temp_Table[256][256];
-    static uchar B_Table[256][256];
+    static uchar     R_Table[256][256];
+    static uchar     G_Table[256][256];
+    static uchar     G_Temp_Table[256][256];
+    static uchar     B_Table[256][256];
 private:
-    AVFormatContext *pformatCtx;
-    AVCodec *pCodec;
-    AVCodecContext *pCodecCtx;
-    AVCodec *pACodec;
-    AVCodecContext *pACodecCtx;
-    int videoIndex;
-    int audioIndex;
+    AVFormatContext  *pformatCtx;
+    AVCodec          *pCodec;
+    AVCodecContext   *pCodecCtx;
+    AVCodec          *pACodec;
+    AVCodecContext   *pACodecCtx;
+    int              videoIndex;
+    int              audioIndex;
 private:
+    QAudioOutput      *output=NULL;
+    QIODevice         *io=NULL;
     QAudioFormat      aformat;
     QAudioDeviceInfo  ainfo;
     bool              audioDeviceOk;
+    int               sampleRate=48000;
+    int               sampleSize=16;
+    int               channel=2;
 
 };
 inline bool avdecode::ReadPacket(AVPacket *packet)

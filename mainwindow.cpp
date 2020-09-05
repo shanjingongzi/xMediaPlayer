@@ -39,5 +39,10 @@ void MainWindow::on_actionopen_triggered()
             cv::imshow("video",frameRbg);
             cv::waitKey(23);
         }
+        if(type==AUDIO_FRAME)
+        {
+            char *data;
+            decoder->ConvertAudio(frame,data);
+        }
     }
 }
