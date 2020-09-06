@@ -35,20 +35,38 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-INCLUDEPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
-DEPENDPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
-QMAKE_LIBDIR+=/opt/Qt5.14.2/5.14.2/gcc_64/lib
 INCLUDEPATH += $$PWD/../../../../usr/local/include/opencv4
 INCLUDEPATH += $$PWD/../../../../usr/local/include
-QMAKE_LIBDIR+= /usr/local/lib
-DEPENDPATH+=/opt/Qt5.14.2/5.14.2/gcc_64/lib
-unix:!macx: LIBS += -lavcodec
-unix:!macx: LIBS += -lavformat
-unix:!macx: LIBS += -lavutil
-unix:!macx: LIBS += -lavfilter
-unix|win32: LIBS += -lopencv_world
+INCLUDEPATH +=/usr/include/x86_64-linux-gnu
 
-unix:!macx: LIBS += -L$$PWD/../../../../usr/lib/x86_64-linux-gnu/ -lswresample
 
-INCLUDEPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
-DEPENDPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
+unix:!macx: LIBS += -L$$PWD/ffmpeg/ -lavcodec
+
+INCLUDEPATH += $$PWD/ffmpeg
+DEPENDPATH += $$PWD/ffmpeg
+
+unix:!macx: LIBS += -L$$PWD/ffmpeg/ -lavformat
+
+INCLUDEPATH += $$PWD/ffmpeg
+DEPENDPATH += $$PWD/ffmpeg
+
+unix:!macx: LIBS += -L$$PWD/ffmpeg/ -lavfilter
+
+INCLUDEPATH += $$PWD/ffmpeg
+DEPENDPATH += $$PWD/ffmpeg
+
+unix:!macx: LIBS += -L$$PWD/ffmpeg/ -lavutil
+
+INCLUDEPATH += $$PWD/ffmpeg
+DEPENDPATH += $$PWD/ffmpeg
+
+unix:!macx: LIBS += -L$$PWD/ffmpeg/ -lswresample
+
+INCLUDEPATH += $$PWD/ffmpeg
+DEPENDPATH += $$PWD/ffmpeg
+
+
+unix:!macx: LIBS += -L$$PWD/../../../../usr/local/lib/ -lopencv_world
+
+INCLUDEPATH += $$PWD/../../../../usr/local/include
+DEPENDPATH += $$PWD/../../../../usr/local/include

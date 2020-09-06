@@ -7,42 +7,63 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    decoder=new avdecode();
+
 }
 
 MainWindow::~MainWindow()
 {
-    delete decoder;
     delete ui;
 }
 
 
 void MainWindow::on_actionopen_triggered()
 {
-    decoder->Initialized();
-    decoder->OpenVideo("/home/shanjingongzi/视频/video.mp4");
-    AVFrame *frame=av_frame_alloc();
-    cv::Mat frameRbg=cv::Mat(cv::Size(decoder->GetWidth(),decoder->GetWidth()),CV_8UC3);
-    AVPacket *packet;
-    av_malloc(sizeof(AVPacket));
-    while(true)
+
+
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    string filename="/home/shanjingongzi/视频/video.mp4";
+    avdecode *decode=new avdecode();
+    decode->Initialized();
+    decode->InitializeAudio();
+    decode->OpenVideo(filename);
+    avdecode::isPlay=true;
+    std::thread t([filename,decode]()
     {
-        bool ret=decoder->ReadPacket(packet);
-        if(!ret)
+        AVPacket *packet;
+        packet=av_packet_alloc();
+        cv::Mat image(Size(decode->GetWidth(),decode->GetHeight()),CV_8UC3);
+        AVFrame *frame=av_frame_alloc();
+        char *out=new char[100000];
+        while(avdecode::isPlay)
         {
-            continue;
+            decode->ReadPacket(packet);
+            FrameType type=decode->ReadFrame(frame,packet);
+
+            if(type==VIDEO_FRAME)
+            {
+                decode->YuvToMat(frame->data[0],frame->data[1],frame->data[2],&image,decode->GetWidth(),decode->GetHeight());
+                cv::imshow("mp4",image);
+                cv::waitKey(23);
+            }
+            if(type==AUDIO_FRAME)
+            {
+                decode->ConvertAudio(frame,out);
+            }
         }
-        FrameType type=decoder->ReadFrame(frame,packet);
-        if(type==VIDEO_FRAME)
-        {
-            decoder->YuvToMat(frame->data[0],frame->data[1],frame->data[2],&frameRbg,decoder->GetWidth(),decoder->GetHeight());
-            cv::imshow("video",frameRbg);
-            cv::waitKey(23);
-        }
-        if(type==AUDIO_FRAME)
-        {
-            char *data;
-            decoder->ConvertAudio(frame,data);
-        }
+        delete decode;
+        delete [] out;
+        av_packet_free(&packet);
+        av_frame_free(&frame);
     }
+    );
+    t.detach();
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    unique_lock<mutex>lock(avdecode::mtx);
+    avdecode::isPlay=false;
 }

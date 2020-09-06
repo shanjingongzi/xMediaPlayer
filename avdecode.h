@@ -22,7 +22,7 @@ extern "C"
 #include"opencv2/opencv.hpp"
 #include<QAudioOutput>
 #include<QAudioDeviceInfo>
-
+#include<mutex>
 class avdecode
 {
 public:
@@ -36,6 +36,10 @@ public:
     int              GetHeight();
     void             InitializeAudio();
     void             ConvertAudio(const AVFrame* const frame,char *out);
+public:
+    static bool isPlay;
+    static std::mutex mtx;
+
 private:
     static uchar     R_Table[256][256];
     static uchar     G_Table[256][256];

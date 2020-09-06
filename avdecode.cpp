@@ -7,6 +7,8 @@ uchar avdecode::B_Table[256][256];
 uchar avdecode::G_Table[256][256];
 uchar avdecode::R_Table[256][256];
 uchar avdecode::G_Temp_Table[256][256];
+bool avdecode::isPlay;
+mutex avdecode::mtx;
 avdecode::avdecode()
 {
     pCodec=nullptr;
