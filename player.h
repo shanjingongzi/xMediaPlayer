@@ -8,7 +8,9 @@
 class Player
 {
 public:
-    Player();
+    virtual void Play();
+    virtual void Pause();
+    virtual void Replay();
 private:
     avdecode *decode;
 
