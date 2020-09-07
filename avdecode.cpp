@@ -16,6 +16,7 @@ avdecode::avdecode()
     pformatCtx=avformat_alloc_context();
     pACodec=nullptr;
     pACodecCtx=nullptr;
+    aCtx = nullptr;
     videoIndex=-1;
     audioIndex=-1;
 }
@@ -41,9 +42,11 @@ void avdecode::InitializeAudio()
     aformat.setChannelCount(channel);
     aformat.setSampleType(QAudioFormat::SignedInt);
     aformat.setByteOrder(QAudioFormat::LittleEndian);
+    aformat.setSampleType(QAudioFormat::SignedInt);
     ainfo=QAudioDeviceInfo(QAudioDeviceInfo::defaultOutputDevice());
     audioDeviceOk=ainfo.isFormatSupported(aformat);
     output=new QAudioOutput(aformat);
+    io=output->start();
 }
 bool avdecode::OpenVideo(const std::string &filename)
 {
@@ -96,16 +99,21 @@ bool avdecode::OpenVideo(const std::string &filename)
     {
         return false;
     }
+    this->sampleRate=pACodecCtx->sample_rate;
+    this->channel=pACodecCtx->channels;
+    aCtx=swr_alloc();
+    swr_alloc_set_opts(aCtx,pACodecCtx->channel_layout,AV_SAMPLE_FMT_S16,pACodecCtx->sample_rate,
+                           pACodecCtx->channels,pACodecCtx->sample_fmt,pACodecCtx->sample_rate,0,0);
+    swr_init(aCtx);
     av_dump_format(pformatCtx,0,filename.c_str(),0);
     return true;
 }
 void avdecode::YuvToMat(uchar *y,uchar *u,uchar *v,Mat *dst,int width,int height)
 {
     int uwidth=width>>1;
-    int rgbWidth=width*3;
     int offset=0;
     uchar Y,U,V;
-    int yIdx,uIdx,vIdx;
+    int yIdx,uIdx;
     for(int i=0;i<height;i++)
     {
         for(int j=0;j<width;j++)
@@ -129,36 +137,15 @@ int avdecode::GetHeight()
 {
     return pCodecCtx->height;
 }
-void avdecode::ConvertAudio(const AVFrame *const aframe,char *out)
+void avdecode::ConvertAudio(const AVFrame *const aframe,char *out,int *size)
 {
-    SwrContext *aCtx = NULL;
-    if(aCtx==NULL)
-    {
-        aCtx=swr_alloc();
-        swr_alloc_set_opts(aCtx,
-                           pACodecCtx->channel_layout,
-                           AV_SAMPLE_FMT_S16,
-                           pACodecCtx->sample_rate,
-                           pACodecCtx->channels,
-                           pACodecCtx->sample_fmt,
-                           pACodecCtx->sample_rate,
-                           0,0
-                           );
-
-         swr_init(aCtx);
-    }
     uint8_t *data[1];
-    data[0]=(uint8_t *)out;
-    int len=swr_convert(aCtx,data,1000,
-                        (const uint8_t **)aframe->data,
-                        aframe->nb_samples);
+    data[0]=(uint8_t*)out;
+    int len=swr_convert(aCtx,data,1024000,(const uint8_t **)aframe->data,aframe->nb_samples);
     if(len<=0)
     {
         return;
     }
-    int outsize=av_samples_get_buffer_size(NULL,pACodecCtx->channels,
-                                           aframe->nb_samples,
-                                           AV_SAMPLE_FMT_S16,
-                                           0);
+    *size=av_samples_get_buffer_size(NULL,pACodecCtx->channels,aframe->nb_samples,AV_SAMPLE_FMT_S16,0);
 }
 

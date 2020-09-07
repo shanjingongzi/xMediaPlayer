@@ -21,12 +21,14 @@ SOURCES += \
     avdecode.cpp \
     main.cpp \
     mainwindow.cpp \
-    openglwidget.cpp
+    openglwidget.cpp \
+    player.cpp
 
 HEADERS += \
     avdecode.h \
     mainwindow.h \
-    openglwidget.h
+    openglwidget.h \
+    player.h
 
 FORMS += \
     mainwindow.ui

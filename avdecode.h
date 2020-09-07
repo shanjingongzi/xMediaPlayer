@@ -35,7 +35,7 @@ public:
     int              GetWidth();
     int              GetHeight();
     void             InitializeAudio();
-    void             ConvertAudio(const AVFrame* const frame,char *out);
+    void             ConvertAudio(const AVFrame* const frame,char *out,int *size);
 public:
     static bool isPlay;
     static std::mutex mtx;
@@ -51,9 +51,10 @@ private:
     AVCodecContext   *pCodecCtx;
     AVCodec          *pACodec;
     AVCodecContext   *pACodecCtx;
+    SwrContext       *aCtx;
     int              videoIndex;
     int              audioIndex;
-private:
+public:
     QAudioOutput      *output=NULL;
     QIODevice         *io=NULL;
     QAudioFormat      aformat;
@@ -76,9 +77,12 @@ inline FrameType avdecode::ReadFrame(AVFrame *frame, const AVPacket *packet)
         return got_frame>0?VIDEO_FRAME:EMPTY_FRAME;
     }
     else if(packet->stream_index==audioIndex){
-        if(avcodec_decode_audio4(pACodecCtx,frame,&got_frame,packet)<0) return ERROR_FRAME;
+        int re=avcodec_send_packet(pACodecCtx,packet);
+        if(re!=0)return ERROR_FRAME;
+        re=avcodec_receive_frame(pACodecCtx,frame);
+        if(re!=0)return ERROR_FRAME;
+        else return AUDIO_FRAME;
         return got_frame>0?AUDIO_FRAME:EMPTY_FRAME;
     }
 }
-
 #endif // AVDECODE_H

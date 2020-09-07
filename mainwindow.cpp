@@ -7,7 +7,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
 }
 
 MainWindow::~MainWindow()
@@ -15,6 +14,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    this->ui->openGLWidget->setGeometry(0,0,this->width(),this->height());
+}
 
 void MainWindow::on_actionopen_triggered()
 {
@@ -36,7 +39,8 @@ void MainWindow::on_pushButton_clicked()
         packet=av_packet_alloc();
         cv::Mat image(Size(decode->GetWidth(),decode->GetHeight()),CV_8UC3);
         AVFrame *frame=av_frame_alloc();
-        char *out=new char[100000];
+        char *out=new char[1024000];
+        memset(out,0,1024000);
         while(avdecode::isPlay)
         {
             decode->ReadPacket(packet);
@@ -44,13 +48,18 @@ void MainWindow::on_pushButton_clicked()
 
             if(type==VIDEO_FRAME)
             {
-                decode->YuvToMat(frame->data[0],frame->data[1],frame->data[2],&image,decode->GetWidth(),decode->GetHeight());
-                cv::imshow("mp4",image);
-                cv::waitKey(23);
+                //decode->YuvToMat(frame->data[0],frame->data[1],frame->data[2],&image,decode->GetWidth(),decode->GetHeight());
+                //cv::imshow("mp4",image);
+                //cv::waitKey(23);
             }
             if(type==AUDIO_FRAME)
             {
-                decode->ConvertAudio(frame,out);
+                int size=-1;
+                decode->ConvertAudio(frame,out,&size);
+                if(*out!='0')
+                {
+                      decode->io->write(out,size);
+                }
             }
         }
         delete decode;

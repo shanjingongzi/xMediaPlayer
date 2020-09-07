@@ -18,13 +18,14 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    void resizeEvent(QResizeEvent *event) override;
 private slots:
     void on_actionopen_triggered();
 
     void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();
+
 
 private:
     Ui::MainWindow *ui;

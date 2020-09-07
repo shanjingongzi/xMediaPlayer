@@ -20,53 +20,36 @@
       <x>0</x>
       <y>0</y>
       <width>1299</width>
-      <height>511</height>
+      <height>751</height>
      </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>580</x>
-      <y>610</y>
-      <width>89</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PushButton</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>750</x>
-      <y>610</y>
+      <x>590</x>
+      <y>290</y>
       <width>89</width>
       <height>25</height>
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>暂停</string>
     </property>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1301</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuopenfile">
-    <property name="title">
-     <string>openfile</string>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>290</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
     </property>
-    <addaction name="actionopen"/>
+    <property name="text">
+     <string>播放</string>
+    </property>
    </widget>
-   <addaction name="menuopenfile"/>
   </widget>
   <action name="actionopen">
    <property name="text">
