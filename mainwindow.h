@@ -7,6 +7,7 @@
 #include<thread>
 #include"avdecode.h"
 #include"opencv2/opencv.hpp"
+#include"player.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -29,5 +30,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    Player *player;
 };
 #endif // MAINWINDOW_H

@@ -34,20 +34,7 @@ void avdecode::Initialized()
         }
     }
 }
-void avdecode::InitializeAudio()
-{
-    aformat.setCodec("audio/pcm");
-    aformat.setSampleRate(sampleRate);
-    aformat.setSampleSize(sampleSize);
-    aformat.setChannelCount(channel);
-    aformat.setSampleType(QAudioFormat::SignedInt);
-    aformat.setByteOrder(QAudioFormat::LittleEndian);
-    aformat.setSampleType(QAudioFormat::SignedInt);
-    ainfo=QAudioDeviceInfo(QAudioDeviceInfo::defaultOutputDevice());
-    audioDeviceOk=ainfo.isFormatSupported(aformat);
-    output=new QAudioOutput(aformat);
-    io=output->start();
-}
+
 bool avdecode::OpenVideo(const std::string &filename)
 {
     int ret=avformat_open_input(&pformatCtx,filename.c_str(),NULL,NULL);
@@ -99,8 +86,6 @@ bool avdecode::OpenVideo(const std::string &filename)
     {
         return false;
     }
-    this->sampleRate=pACodecCtx->sample_rate;
-    this->channel=pACodecCtx->channels;
     aCtx=swr_alloc();
     swr_alloc_set_opts(aCtx,pACodecCtx->channel_layout,AV_SAMPLE_FMT_S16,pACodecCtx->sample_rate,
                            pACodecCtx->channels,pACodecCtx->sample_fmt,pACodecCtx->sample_rate,0,0);

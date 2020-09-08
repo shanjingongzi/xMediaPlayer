@@ -20,8 +20,6 @@ extern "C"
 #include<string>
 #include<queue>
 #include"opencv2/opencv.hpp"
-#include<QAudioOutput>
-#include<QAudioDeviceInfo>
 #include<mutex>
 class avdecode
 {
@@ -54,16 +52,6 @@ private:
     SwrContext       *aCtx;
     int              videoIndex;
     int              audioIndex;
-public:
-    QAudioOutput      *output=NULL;
-    QIODevice         *io=NULL;
-    QAudioFormat      aformat;
-    QAudioDeviceInfo  ainfo;
-    bool              audioDeviceOk;
-    int               sampleRate=48000;
-    int               sampleSize=16;
-    int               channel=2;
-
 };
 inline bool avdecode::ReadPacket(AVPacket *packet)
 {
