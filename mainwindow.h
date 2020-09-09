@@ -5,6 +5,8 @@
 #include<string>
 #include<queue>
 #include<thread>
+#include<QDialog>
+#include<QFileDialog>
 #include"avdecode.h"
 #include"opencv2/opencv.hpp"
 #include"player.h"
@@ -21,15 +23,14 @@ public:
     ~MainWindow();
     void resizeEvent(QResizeEvent *event) override;
 private slots:
-    void on_actionopen_triggered();
 
-    void on_pushButton_clicked();
+    void on_btnOpenFIle_clicked();
 
-    void on_pushButton_2_clicked();
-
-
+    void on_btnPlay_clicked();
 private:
+    void closeEvent(QCloseEvent* event) override;
     Ui::MainWindow *ui;
     Player *player;
+    void ResetLocation(QWidget*object,int x,int y);
 };
 #endif // MAINWINDOW_H

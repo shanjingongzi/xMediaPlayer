@@ -20,6 +20,7 @@ void OpenGLWidget::paintGL()
     GLuint imageTex=MatToTexTure(&image,GL_LINEAR,GL_LINEAR,GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D,imageTex);
     glBegin(GL_POLYGON);
+
     glTexCoord2f(0,0);
     glVertex2f(-1,1);
 
@@ -35,7 +36,6 @@ void OpenGLWidget::paintGL()
     glEnd();
     glDisable(GL_TEXTURE_2D);
     glDeleteTextures(1,&imageTex);
-
 }
 void OpenGLWidget::resizeGL(int w, int h)
 {

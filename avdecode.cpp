@@ -6,17 +6,17 @@ using namespace cv;
 uchar avdecode::B_Table[256][256];
 uchar avdecode::G_Table[256][256];
 uchar avdecode::R_Table[256][256];
-uchar avdecode::G_Temp_Table[256][256];
+int avdecode::G_Temp_Table[256][256];
 bool avdecode::isPlay;
 mutex avdecode::mtx;
 avdecode::avdecode()
 {
     pCodec=nullptr;
     pCodecCtx=nullptr;
-    pformatCtx=avformat_alloc_context();
     pACodec=nullptr;
     pACodecCtx=nullptr;
     aCtx = nullptr;
+    pformatCtx=nullptr;
     videoIndex=-1;
     audioIndex=-1;
 }
@@ -37,6 +37,9 @@ void avdecode::Initialized()
 
 bool avdecode::OpenVideo(const std::string &filename)
 {
+    avcodec_free_context(&pCodecCtx);
+    pformatCtx=avformat_alloc_context();
+    avformat_flush(pformatCtx);
     int ret=avformat_open_input(&pformatCtx,filename.c_str(),NULL,NULL);
     if(ret!=0)
     {
@@ -133,4 +136,8 @@ void avdecode::ConvertAudio(const AVFrame *const aframe,char *out,int *size)
     }
     *size=av_samples_get_buffer_size(NULL,pACodecCtx->channels,aframe->nb_samples,AV_SAMPLE_FMT_S16,0);
 }
-
+void avdecode::Close()
+{
+    avformat_close_input(&pformatCtx);
+    avcodec_free_context(&pCodecCtx);
+}

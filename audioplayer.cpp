@@ -27,3 +27,8 @@ void AudioPlayer::Run(const char *data,const int size)
 {
     io->write(data,size);
 }
+void AudioPlayer::Close()
+{
+    io->close();
+    output->stop();
+}

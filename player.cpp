@@ -4,6 +4,7 @@ using namespace cv;
 bool Player::IsReady;
 bool Player::IsStop;
 bool Player::IsPause;
+bool Player::fileIsOpen;
 Player::Player()
 {
     decode=new avdecode();
@@ -12,6 +13,7 @@ Player::Player()
     IsReady=false;
     IsPause=true;
     IsStop=true;
+    fileIsOpen=false;
 }
 Player::Player(OpenGLWidget *videoptr)
 {
@@ -30,10 +32,11 @@ void Player::Initalize()
 void Player::Start()
 {
     unique_lock<mutex>look(mtx);
-    if(IsReady!=true)
+    if(!fileIsOpen)
     {
         return;
     }
+    IsReady=true;
     IsPause=false;
     IsStop=false;
     this->StartDecodeThread();
@@ -60,15 +63,27 @@ void Player::Replay()
 }
 void Player::Stop()
 {
-    unique_lock<mutex>look(mtx);
     IsPause=false;
     IsStop=true;
+    IsReady=false;
+    fileIsOpen=false;
+    this_thread::sleep_for(chrono::milliseconds(100));
+    mtx.lock();
+    while(!videoFrame.empty())
+    {
+        videoFrame.pop();
+    }
+    while(!audioFrame.empty())
+    {
+        audioFrame.pop();
+    }
+    mtx.unlock();
 }
 bool Player::OpenFile(const string &filename)
 {
     if(decode->OpenVideo(filename))
     {
-        IsReady=true;
+        fileIsOpen=true;
         return true;
     }
     else
@@ -80,8 +95,7 @@ void Player::StartDecodeThread()
 {
     thread t([this]()
     {
-        AVPacket *packet=av_packet_alloc();
-        AVFrame  *frame=av_frame_alloc();
+
         FrameType type;
         int width=this->decode->GetWidth();
         int height=this->decode->GetHeight();
@@ -92,29 +106,44 @@ void Player::StartDecodeThread()
                 break;
             }
             if(IsPause){
+                this_thread::sleep_for(chrono::microseconds(50));
                 continue;
             }
             else
             {
                 this->mtx.lock();
-                if(this->videoFrame.size()<10&&this->audioFrame.size()<10)
+                if(this->videoFrame.size()<10||this->audioFrame.size()<10)
                 {
-                    this->decode->ReadPacket(packet);
+                    this->mtx.unlock();
+                    AVPacket *packet=av_packet_alloc();
+                    AVFrame  *frame=av_frame_alloc();
+                    bool ret=this->decode->ReadPacket(packet);
+                    if(!ret)this->IsReady=false;
                     type=this->decode->ReadFrame(frame,packet);
                     if(type==VIDEO_FRAME)
                     {
+                        double time=frame->pts;
                         Mat image(height,width,CV_8UC3);
                         this->decode->YuvToMat(frame->data[0],frame->data[1],frame->data[2],&image,width,height);
-                        this->videoFrame.push(image);
+                        mtx.lock();
+                        this->videoFrame.push(VideoFrame(image,time));
+                        mtx.unlock();
                     }
                     else if(type==AUDIO_FRAME)
                     {
-                        char *data=new char[10000];
+                        double time=frame->pts;
+                        char data[10000];
                         this->decode->ConvertAudio(frame,data,&size);
-                        this->audioFrame.push(AudioFrame(data,size));
+                        mtx.lock();
+                        this->audioFrame.push(AudioFrame(data,size,time));
+                        mtx.unlock();
                     }
+                    av_packet_free(&packet);
+                    av_frame_free(&frame);
+                    continue;
                 }
                 this->mtx.unlock();
+                continue;
             }
             this_thread::sleep_for(chrono::milliseconds(5));
         }
@@ -126,19 +155,25 @@ void Player::StartVideoThread()
 
     thread t([this]()
     {
+        double lastTime=0;
         while(IsReady)
         {
-            Mat image;
+            int timeStep=0;
             mtx.lock();
             if(this->videoFrame.size()>0)
             {
-                 image=this->videoFrame.front();
+                 VideoFrame videoframe=this->videoFrame.front();
                  this->videoFrame.pop();
+                 mtx.unlock();
+                 this->videoPlayer->Draw(videoframe.image);
+                 timeStep=videoframe.timestep-lastTime;
+                 lastTime=videoframe.timestep;
+                 double delay=av_q2d(this->decode->pCodecCtx->time_base);
+                 this_thread::sleep_for(chrono::milliseconds((int)(timeStep*delay)));
+                 continue;
             }
             mtx.unlock();
-            if(!image.empty())
-            this->videoPlayer->Draw(image);
-            this_thread::sleep_for(chrono::milliseconds(23));
+            this_thread::sleep_for(chrono::milliseconds(20));
         }
     });
     t.detach();
@@ -148,21 +183,25 @@ void Player::StartAudioThread()
     thread t([this]()
     {
         AudioFrame audioframe;
-        this->mtx.lock();
+        double lastTime=0;
         while(this->IsReady)
         {
+            double sleeptime=0;
+            this->mtx.lock();
             if(this->audioFrame.size()>0)
             {
                 audioframe=this->audioFrame.front();
                 this->audioFrame.pop();
-            }
-            this->mtx.unlock();
-            if(audioframe.data[0]!='\0')
-            {
+                this->mtx.unlock();
+                sleeptime=(audioframe.timestep-lastTime);
+                lastTime=audioframe.timestep;
                 this->audioPlayer->Run(audioframe.data,audioframe.size);
-                //delete[] audioframe.data;
+                double delay=av_q2d(this->decode->pACodecCtx->time_base);
+                std::this_thread::sleep_for(chrono::milliseconds((int)(sleeptime*delay)));
+                continue;
             }
-            //audioframe.data=nullptr;
+            this->mtx.unlock();   
+            this_thread::sleep_for(chrono::milliseconds(5));
         }
     });
     t.detach();

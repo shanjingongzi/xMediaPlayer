@@ -24,30 +24,56 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="btnOpenFIle">
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>690</y>
-      <width>89</width>
-      <height>25</height>
+      <x>540</x>
+      <y>400</y>
+      <width>101</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
-     <string>暂停</string>
+     <string>打开文件</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="btnPre">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>690</y>
-      <width>89</width>
-      <height>25</height>
+      <x>380</x>
+      <y>620</y>
+      <width>115</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>上一曲</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnPlay">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>620</y>
+      <width>120</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
      <string>播放</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnNext">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>620</y>
+      <width>115</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>下一曲</string>
     </property>
    </widget>
   </widget>

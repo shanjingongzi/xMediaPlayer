@@ -10,6 +10,7 @@ public:
     ~AudioPlayer();
     void Initalize();
     void Run(const char *,const int size);
+    void Close();
 private:
     QAudioOutput      *output=NULL;
     QIODevice         *io=NULL;

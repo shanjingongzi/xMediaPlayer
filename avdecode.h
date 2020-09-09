@@ -34,6 +34,7 @@ public:
     int              GetHeight();
     void             InitializeAudio();
     void             ConvertAudio(const AVFrame* const frame,char *out,int *size);
+    void             Close();
 public:
     static bool isPlay;
     static std::mutex mtx;
@@ -41,9 +42,9 @@ public:
 private:
     static uchar     R_Table[256][256];
     static uchar     G_Table[256][256];
-    static uchar     G_Temp_Table[256][256];
+    static int     G_Temp_Table[256][256];
     static uchar     B_Table[256][256];
-private:
+public:
     AVFormatContext  *pformatCtx;
     AVCodec          *pCodec;
     AVCodecContext   *pCodecCtx;

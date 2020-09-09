@@ -16,6 +16,7 @@ public:
     void         paintGL() override;
     void         resizeGL(int w, int h) override;
     GLuint       MatToTexTure(const cv::Mat *const image,GLenum minFilter,GLenum magFilter,GLenum swarpFilter);
+    void         Close();
 private:
     cv::Mat image;
 

@@ -12,9 +12,24 @@
 struct AudioFrame
 {
     int size;
-    char *data;
-    AudioFrame(char *_data,int _size):data(_data),size(_size){}
+    char data[10000];
+    double timestep;
+    AudioFrame(char *_data,int _size,double time):size(_size),timestep(time){memcpy(data,_data,size);}
     AudioFrame(){}
+    AudioFrame(const AudioFrame&rhs):size(rhs.size),timestep(rhs.timestep){memcpy(data,rhs.data,size);}
+
+    AudioFrame operator=(const AudioFrame&rhs)
+    {
+        size=rhs.size;
+        timestep=rhs.timestep;
+        memcpy(data,rhs.data,size);
+    }
+};
+struct VideoFrame
+{
+    cv::Mat image;
+    double timestep;
+    VideoFrame(const cv::Mat _image,double _timestep):image(_image),timestep(_timestep){};
 };
 
 class Player
@@ -32,15 +47,17 @@ public:
     void                    Start();
     virtual void            Replay();
     void                    Stop();
+public:
+    static bool             fileIsOpen;
+    static bool             IsReady;
+    static bool             IsPause;
+    static bool             IsStop;
 private:
     avdecode                *decode;
     AudioPlayer             *audioPlayer;
     OpenGLWidget            *videoPlayer;
-    static bool             IsReady;
-    static bool             IsPause;
-    static bool             IsStop;
-    std::queue<cv::Mat>     videoFrame;
-    std::queue<AudioFrame>      audioFrame;
+    std::queue<VideoFrame>  videoFrame;
+    std::queue<AudioFrame>  audioFrame;
     std::mutex              mtx;
     std::condition_variable cond;
 };
